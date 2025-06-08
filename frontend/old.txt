@@ -1,0 +1,621 @@
+    <>
+
+      {isLogin &&
+        <>
+          <div className="banner">
+
+            <div className="slider" style={{ "--quantity": 10 }}>
+
+              <div className="item" style={{ "--position": 2 }}>
+                <button data-bs-toggle="offcanvas" data-bs-target="#offcanvasRight" className='button-49' onClick={(e) => handleChoose(e, 5)}>{headerArr[4]}</button>
+                <img src="images/cyber-1.gif" alt="" />
+              </div>
+
+              <div className="item" style={{ "--position": 4 }}>
+                <button data-bs-toggle="offcanvas" data-bs-target="#offcanvasRight" className='button-49' onClick={(e) => handleChoose(e, 1)}>{headerArr[0]}</button>
+                <img src="images/cyber-2.gif" alt="" />
+              </div>
+
+              <div className="item" style={{ "--position": 6 }}>
+                <button data-bs-toggle="offcanvas" data-bs-target="#offcanvasRight" className='button-49' onClick={(e) => handleChoose(e, 2)}>{headerArr[1]}</button>
+                <img src="images/cyber-3.gif" alt="" />
+              </div>
+
+              <div className="item" style={{ "--position": 8 }}>
+                <button data-bs-toggle="offcanvas" data-bs-target="#offcanvasRight" className='button-49' onClick={(e) => handleChoose(e, 3)}>{headerArr[2]}</button>
+                <img src="images/cyber-4.gif" alt="" />
+              </div>
+
+              <div className="item" style={{ "--position": 10 }} onClick={(e) => handleChoose(e, 4)}>
+                <button data-bs-toggle="offcanvas" data-bs-target="#offcanvasRight" className='button-49'>{headerArr[3]}</button>
+                <img src="images/cyber-5.gif" alt="" />
+              </div>
+
+            </div>
+
+            <div className='pilot' style={{
+              backgroundImage: isLogin ? `url(images/head3.png)` : ''
+            }}></div>
+
+            <div className="content">
+
+              <h1 data-content="E2Decrypt" style={{ color: '#dc3235' }}>E2D</h1>
+
+              <div className='l d-none d-sm-block'></div>
+
+            </div>
+
+            <button className='button-24' onClick={handleLogout}>Đăng xuất <IoCaretForwardOutline /></button>
+
+          </div>
+        </>
+      }
+
+
+
+      {/* Cửa sổ làm việc */}
+      <div>
+
+        <div
+          className="offcanvas offcanvas-end"
+          tabIndex="-1"
+          id="offcanvasRight"
+          aria-labelledby="offcanvasRightLabel"
+        >
+
+          <div className="offcanvas-header">
+
+            <h5 id="offcanvasRightLabel" style={{ marginTop: '15px' }}>{header}</h5>
+
+            <button
+              type="button"
+              className="btn-close text-reset"
+              data-bs-dismiss="offcanvas"
+              aria-label="Đóng"
+            ></button>
+
+
+          </div>
+
+          <div className="offcanvas-body">
+
+            {content}
+
+          </div>
+
+          <Footer />
+
+        </div>
+
+      </div>
+
+      <ToastContainer />
+
+      {!isLogin &&
+        <Login handleCheckLogin={handleCheckLogin} />
+      }
+
+    </>
+
+
+    //css
+    @import url('https://fonts.cdnfonts.com/css/ica-rubrik-black');
+@import url('https://fonts.cdnfonts.com/css/poppins');
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    /* background-image:
+        repeating-linear-gradient(to right, transparent 0 100px,
+            #00CCF5 100px 101px),
+        repeating-linear-gradient(to bottom, transparent 0 100px,
+            #00CCF5 100px 101px); */
+    background-image: url(images/planet.gif);
+    background-position: center;
+    background-repeat: no-repeat;
+    background-size: cover;
+}
+
+.pilot {
+    position: absolute;
+    width: 40vw;
+    height: 72vh;
+    /* background-image: url(images/head3.png); */
+    background-size: cover;
+    background-repeat: no-repeat;
+    background-position: top;
+    top: 15%;
+    left: 30%;
+}
+
+.banner {
+    width: 100%;
+    height: 100vh;
+    text-align: center;
+    overflow: hidden;
+    position: relative;
+    background-image:
+        repeating-linear-gradient(to right, transparent 0 100px,
+            #25283b22 100px 101px),
+        repeating-linear-gradient(to bottom, transparent 0 100px,
+            #25283b22 100px 101px);
+}
+
+.banner .slider {
+    position: absolute;
+    width: 200px;
+    height: 250px;
+    top: 10%;
+    left: calc(50% - 100px);
+    transform-style: preserve-3d;
+    transform: perspective(1000px);
+    animation: autoRun 20s linear infinite;
+    z-index: 2;
+}
+
+@keyframes autoRun {
+    from {
+        transform: perspective(1000px) rotateX(-16deg) rotateY(0deg);
+    }
+
+    to {
+        transform: perspective(1000px) rotateX(-16deg) rotateY(360deg);
+    }
+}
+
+.banner .slider .item {
+    position: absolute;
+    inset: 0 0 0 0;
+    transform:
+        rotateY(calc((var(--position) - 1) * (360 / var(--quantity)) * 1deg)) translateZ(550px);
+}
+
+.banner .slider .item img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.banner .content {
+    position: absolute;
+    bottom: 0;
+    left: 50%;
+    transform: translateX(-50%);
+    width: min(1400px, 100vw);
+    height: max-content;
+    padding-bottom: 100px;
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    align-items: center;
+    z-index: 1;
+}
+
+.banner .content h1 {
+    font-family: 'ICA Rubrik';
+    font-size: 16em;
+    line-height: 1em;
+    color: #25283B;
+    position: relative;
+}
+
+.banner .content h1::after {
+    position: absolute;
+    inset: 0 0 0 0;
+    content: attr(data-content);
+    z-index: 2;
+    -webkit-text-stroke: 2px #d2d2d2;
+    color: transparent;
+}
+
+.banner .content .author {
+    font-family: Poppins;
+    text-align: right;
+    max-width: 200px;
+}
+
+.banner .content h2 {
+    font-size: 3em;
+}
+
+.banner .content .model {
+    background-image: url(images/model.png);
+    width: 100%;
+    height: 75vh;
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    background-size: auto 130%;
+    background-repeat: no-repeat;
+    background-position: top center;
+    z-index: 1;
+}
+
+@media screen and (max-width: 1023px) {
+    .banner .slider {
+        width: 160px;
+        height: 200px;
+        left: calc(50% - 80px);
+    }
+
+    .banner .slider .item {
+        transform:
+            rotateY(calc((var(--position) - 1) * (360 / var(--quantity)) * 1deg)) translateZ(180px);
+    }
+
+    .banner .content h1 {
+        text-align: center;
+        width: 100%;
+        text-shadow: 0 10px 20px #000;
+        font-size: 7em;
+    }
+
+    .banner .content .author {
+        color: #fff;
+        padding: 20px;
+        text-shadow: 0 10px 20px #000;
+        z-index: 2;
+        max-width: unset;
+        width: 100%;
+        text-align: center;
+        padding: 0 30px;
+    }
+}
+
+@media screen and (max-width: 767px) {
+    .banner .slider {
+        width: 100px;
+        height: 150px;
+        left: calc(50% - 50px);
+    }
+
+    .banner .slider .item {
+        transform:
+            rotateY(calc((var(--position) - 1) * (360 / var(--quantity)) * 1deg)) translateZ(180px);
+    }
+
+    .banner .content h1 {
+        font-size: 5em;
+    }
+}
+
+@media screen and (max-width: 540px) {
+    .banner .slider {
+        width: 100px;
+        height: 150px;
+        left: calc(50% - 50px);
+    }
+
+    .banner .slider .item {
+        transform:
+            rotateY(calc((var(--position) - 1) * (360 / var(--quantity)) * 1deg)) translateZ(300px);
+    }
+
+    .banner .content h1 {
+        font-size: 5em;
+    }
+}
+
+.item {
+    cursor: pointer;
+    border: 2px solid #00CCF5;
+    width: 10vw;
+    padding: 10px;
+    background-size: cover;
+}
+
+@media (max-width: 540px) {
+
+    .item {
+        width: 70vw;
+        height: 45vh;
+    }
+}
+
+@media (max-width: 344px) {
+
+    .item {
+        width: 50vw;
+        height: 45vh;
+    }
+}
+
+.item>img {
+    object-fit: cover;
+}
+
+.item:hover {
+    border-top-color: #B01E20;
+    /* box-shadow: rgba(50, 50, 93, 0.25) 0px 50px 100px -20px, rgba(0, 0, 0, 0.3) 0px 30px 60px -30px; */
+    box-shadow: rgba(240, 46, 170, 0.4) 5px 5px, rgba(240, 46, 170, 0.3) 10px 10px, rgba(240, 46, 170, 0.2) 15px 15px, rgba(240, 46, 170, 0.1) 20px 20px, rgba(240, 46, 170, 0.05) 25px 25px;
+
+}
+
+/* CSS */
+.button-49,
+.button-49:after {
+    font-family: "Anton SC", sans-serif;
+    font-style: normal;
+    line-height: 10px;
+    font-size: 10px;
+    background: linear-gradient(45deg, transparent 5%, #FF013C 5%);
+    border: 0;
+    color: #fff;
+    letter-spacing: 3px;
+    box-shadow: 6px 0px 0px #00E6F6;
+    outline: transparent;
+    position: relative;
+    user-select: none;
+    -webkit-user-select: none;
+    touch-action: manipulation;
+    max-width: 120px;
+    max-height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 5px;
+}
+
+.button-49:after {
+    --slice-0: inset(50% 50% 50% 50%);
+    --slice-1: inset(80% -6px 0 0);
+    --slice-2: inset(50% -6px 30% 0);
+    --slice-3: inset(10% -6px 85% 0);
+    --slice-4: inset(40% -6px 43% 0);
+    --slice-5: inset(80% -6px 5% 0);
+
+    content: 'ALTERNATE TEXT';
+    display: block;
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: linear-gradient(45deg, transparent 3%, #00E6F6 3%, #00E6F6 5%, #FF013C 5%);
+    text-shadow: -3px -3px 0px #F8F005, 3px 3px 0px #00E6F6;
+    clip-path: var(--slice-0);
+}
+
+.button-49:hover:after {
+    animation: 1s glitch;
+    animation-timing-function: steps(2, end);
+}
+
+@keyframes glitch {
+    0% {
+        clip-path: var(--slice-1);
+        transform: translate(-20px, -10px);
+    }
+
+    10% {
+        clip-path: var(--slice-3);
+        transform: translate(10px, 10px);
+    }
+
+    20% {
+        clip-path: var(--slice-1);
+        transform: translate(-10px, 10px);
+    }
+
+    30% {
+        clip-path: var(--slice-3);
+        transform: translate(0px, 5px);
+    }
+
+    40% {
+        clip-path: var(--slice-2);
+        transform: translate(-5px, 0px);
+    }
+
+    50% {
+        clip-path: var(--slice-3);
+        transform: translate(5px, 0px);
+    }
+
+    60% {
+        clip-path: var(--slice-4);
+        transform: translate(5px, 10px);
+    }
+
+    70% {
+        clip-path: var(--slice-2);
+        transform: translate(-10px, 10px);
+    }
+
+    80% {
+        clip-path: var(--slice-5);
+        transform: translate(20px, -10px);
+    }
+
+    90% {
+        clip-path: var(--slice-1);
+        transform: translate(-10px, 0px);
+    }
+
+    100% {
+        clip-path: var(--slice-1);
+        transform: translate(0);
+    }
+}
+
+@media (min-width: 768px) {
+
+    .button-49,
+    .button-49:after {
+        width: 200px;
+        height: 86px;
+        line-height: 88px;
+    }
+}
+
+@media (max-width: 540px) {
+
+    .button-49 {
+        width: 50vw;
+        height: 40vh;
+    }
+}
+
+@media (max-width: 344px) {
+
+    .button-49 {
+        width: 50vw;
+        height: 40vh;
+    }
+}
+
+p {
+    font-family: "Anton SC", sans-serif;
+    font-style: normal;
+}
+
+/* CSS */
+.button-89 {
+    border-color: #dc3235;
+    background-color: transparent;
+
+    position: fixed;
+    bottom: 30px;
+    right: 60px;
+    z-index: 1;
+    padding: 10px 20px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.button-89>a {
+    color: #dc3235;
+    text-decoration: none;
+}
+
+.button-89:hover {
+    color: #fff;
+    background-color: #dc3235;
+}
+
+.work-container {
+    height: 60vh;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    position: relative;
+}
+
+.work-place-1 {
+    background-color: white;
+    margin-top: 2px;
+}
+
+.work-place-2 {
+    background-color: white;
+}
+
+.work-place-3 {
+    background-color: white;
+
+}
+
+.work-place-4 {
+    background-color: white;
+}
+
+.deco {
+    background-position: center;
+    background-repeat: no-repeat;
+    background-size: cover;
+    width: 15%;
+    height: 60%;
+    margin: 50px;
+}
+
+.deco-1 {
+    background-image: url(images/cyber-1.gif);
+}
+
+.deco-2 {
+    background-image: url(images/cyber-2.gif);
+    position: absolute;
+    right: 0;
+}
+
+.deco-3 {
+    background-image: url(images/cyber-3.gif);
+}
+
+.deco-4 {
+    background-image: url(images/cyber-4.gif);
+    position: absolute;
+    right: 0;
+}
+
+.l {
+    background-image: url(images/bot2.gif);
+    background-repeat: no-repeat;
+    background-position: center;
+    background-size: contain;
+    min-width: 15vw;
+    min-height: 30vh;
+    z-index: 3;
+}
+
+
+/* CSS */
+.button-24 {
+    background: #FF4742;
+    border: 1px solid #FF4742;
+    box-shadow: rgba(0, 0, 0, 0.1) 1px 2px 4px;
+    box-sizing: border-box;
+    color: #FFFFFF;
+    cursor: pointer;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-family: nunito, roboto, proxima-nova, "proxima nova", sans-serif;
+    font-size: 16px;
+    font-weight: 800;
+    line-height: 16px;
+    min-height: 40px;
+    outline: 0;
+    padding: 12px 14px;
+    text-align: center;
+    text-rendering: geometricprecision;
+    text-transform: none;
+    user-select: none;
+    -webkit-user-select: none;
+    touch-action: manipulation;
+    vertical-align: middle;
+    z-index: 3;
+    position: absolute;
+    right: 20px;
+    top: 20px;
+}
+
+.button-24:hover,
+.button-24:active {
+    background-color: initial;
+    background-position: 0 0;
+    color: #FF4742;
+}
+
+.button-24:active {
+    opacity: .5;
+}
+
+@media (max-width: 540px) {
+
+    .button-24 {
+        position: relative;
+    }
+}
+
+@media (max-width: 344px) {
+
+    .button-24 {
+        position: relative;
+    }
+}

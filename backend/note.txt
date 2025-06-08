@@ -1,0 +1,4 @@
+tao file p12: openssl pkcs12 -export -out certificate.p12 -inkey private.key -in certificate.pem
+(Pass: 1235)
+
+kiem tra file p12: openssl pkcs12 -info -in certificate.p12

@@ -1,0 +1,31 @@
+.main-container {
+    width: 100vw;
+    height: 100vh;
+    background-color: #eb7a46;
+    /* background-image: url(images/banner-background.jpeg); */
+    background-repeat: no-repeat;
+    background-position: center;
+    background-size: cover;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-direction: column;
+}
+
+
+.block {
+    max-width: 660px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 45px;
+    margin-top: 30px;
+}
+
+.block-2 {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 55px;
+    margin-top: 40px;
+}

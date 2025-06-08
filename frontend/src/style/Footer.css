@@ -1,0 +1,75 @@
+/* Cảnh */
+.scene-F {
+    width: 400px;
+    height: 200px;
+    perspective: 1000px;
+}
+
+/* Khối */
+.cube-F {
+    width: 400px;
+    height: 200px;
+    position: relative;
+    transform-style: preserve-3d;
+    transition: transform 0.5s;
+    transform: none;
+}
+
+.scene-F:hover .cube-F {
+    transform: translateX(30px) translateY(30px) rotateX(-10deg) rotateY(-10deg);
+}
+
+/* Mặt chung */
+.face-F {
+    position: absolute;
+    width: 400px;
+    height: 200px;
+    background: rgba(250, 67, 67, 0.9);
+    border: 2px solid #d49494;
+    box-sizing: border-box;
+    line-height: 200px;
+    font-size: 24px;
+    font-weight: bold;
+    color: white;
+    text-align: center;
+    backface-visibility: hidden;
+}
+
+/* Front */
+.front-F {
+    cursor: pointer;
+    transform: translateZ(100px);
+    background-image: url(images/nyan-cat.webp);
+    background-repeat: no-repeat;
+    background-position: center;
+    background-size: cover;
+}
+
+/* Back */
+.back-F {
+    transform: rotateY(180deg) translateZ(100px);
+}
+
+/* Right */
+.right-F {
+    /* background-image: url(images/nyan-cat.webp);
+    background-repeat: no-repeat;
+    background-position: center;
+    background-size: cover; */
+    transform: rotateY(90deg) translateZ(200px);
+}
+
+/* Left */
+.left-F {
+    transform: rotateY(-90deg) translateZ(0px) translateX(100px);
+}
+
+/* Top */
+.top-F {
+    transform: rotateX(90deg) translateZ(100px);
+}
+
+/* Bottom */
+.bottom-F {
+    transform: rotateX(-90deg) translateZ(100px);
+}

@@ -1,0 +1,63 @@
+/* CubeBox.css */
+.scene-H {
+    width: 200px;
+    height: 200px;
+    perspective: 1000px;
+}
+
+.cube-H {
+    width: 100%;
+    height: 100%;
+    position: relative;
+    transform-style: preserve-3d;
+    transition: transform 0.5s;
+}
+
+.scene-H:hover .cube-H {
+    transform: translateX(-20px) translateY(20px) rotateX(-10deg) rotateY(15deg);
+    z-index: 1;
+}
+
+.face-H {
+    position: absolute;
+    width: 200px;
+    height: 200px;
+    background: #FFCA00;
+    border: 2px solid #ebda97;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: bold;
+    color: white;
+    font-size: 18px;
+}
+
+/* Vị trí các mặt */
+.front-H {
+    background-image: url(images/logo.gif);
+    background-repeat: no-repeat;
+    background-position: center;
+    background-size: cover;
+    transform: translateZ(100px);
+    box-shadow: rgba(50, 50, 93, 0.25) 0px 50px 100px -20px, rgba(0, 0, 0, 0.3) 0px 30px 60px -30px;
+}
+
+.back {
+    transform: rotateY(180deg) translateZ(100px);
+}
+
+.right {
+    transform: rotateY(90deg) translateZ(100px);
+}
+
+.left {
+    transform: rotateY(-90deg) translateZ(100px);
+}
+
+.top {
+    transform: rotateX(90deg) translateZ(100px);
+}
+
+.bottom {
+    transform: rotateX(-90deg) translateZ(100px);
+}

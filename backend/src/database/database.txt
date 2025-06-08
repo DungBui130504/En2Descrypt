@@ -1,0 +1,80 @@
+-- 1. Tạo database và chọn sử dụng
+IF NOT EXISTS (SELECT 1 FROM sys.databases WHERE name = N'ANM')
+BEGIN
+    CREATE DATABASE ANM;
+END
+GO
+
+USE ANM;
+GO
+
+-- 2. Tạo bảng Users
+CREATE TABLE [Users] (
+    UserID       INT            IDENTITY(1,1) PRIMARY KEY,
+    FullName     NVARCHAR(200)  NOT NULL,
+    Username     NVARCHAR(100)  NOT NULL UNIQUE,
+    PasswordHash NVARCHAR(MAX) NOT NULL,   
+    Email        NVARCHAR(200)  NOT NULL UNIQUE,
+    CreatedAt    DATETIME       NOT NULL DEFAULT GETDATE()
+);
+GO
+
+-- 3. Tạo bảng Keys
+CREATE TABLE [Keys] (
+    KeyID         INT            IDENTITY(1,1) PRIMARY KEY,
+    UserID        INT            NOT NULL,
+    PublicKey     NVARCHAR(MAX)  NOT NULL,
+    PrivateKey    NVARCHAR(MAX)  NOT NULL,
+    CreatedAt     DATETIME       NOT NULL DEFAULT GETDATE(),
+    CONSTRAINT FK_Keys_Users FOREIGN KEY (UserID)
+        REFERENCES [Users](UserID)
+        ON DELETE CASCADE
+        ON UPDATE CASCADE
+);
+GO
+
+-- 4. Tạo bảng Signatures
+CREATE TABLE [Signatures] (
+    SignatureID   INT            IDENTITY(1,1) PRIMARY KEY,
+    UserID        INT            NOT NULL,
+    SignatureData VARBINARY(MAX) NOT NULL,
+    CreatedAt     DATETIME       NOT NULL DEFAULT GETDATE(),
+    CONSTRAINT FK_Signatures_Users FOREIGN KEY (UserID)
+        REFERENCES [Users](UserID)
+        ON DELETE CASCADE
+        ON UPDATE CASCADE
+);
+GO
+
+-- Insert
+
+-- 1. Thêm 5 người dùng vào bảng Users
+INSERT INTO [Users] (FullName, Username, PasswordHash, Email)
+VALUES 
+(N'Nguyễn Văn A', 'nguyenvana', 'a1b2c3d4', 'vana@example.com'),
+(N'Trần Thị B',   'tranthib',   'b2c3d4e5', 'thib@example.com'),
+(N'Lê Văn C',     'levanc',     'c3d4e5f6', 'vanc@example.com'),
+(N'Phạm Thị D',   'phamthid',   'd4e5f6g7', 'thid@example.com'),
+(N'Hoàng Văn E',  'hoangvane',  'e5f6g7h8', 'vane@example.com');
+GO
+
+-- 2. Thêm khóa cho mỗi người (1 key mỗi người)
+INSERT INTO [Keys] (UserID, PublicKey, PrivateKey)
+VALUES
+(1, N'PublicKey_A', N'PrivateKey_A'),
+(2, N'PublicKey_B', N'PrivateKey_B'),
+(3, N'PublicKey_C', N'PrivateKey_C'),
+(4, N'PublicKey_D', N'PrivateKey_D'),
+(5, N'PublicKey_E', N'PrivateKey_E');
+GO
+
+-- 3. Thêm chữ ký cho mỗi người (1 chữ ký mỗi người)
+INSERT INTO [Signatures] (UserID, SignatureData)
+VALUES
+(1, CONVERT(VARBINARY(MAX), 'Signature_A')),
+(2, CONVERT(VARBINARY(MAX), 'Signature_B')),
+(3, CONVERT(VARBINARY(MAX), 'Signature_C')),
+(4, CONVERT(VARBINARY(MAX), 'Signature_D')),
+(5, CONVERT(VARBINARY(MAX), 'Signature_E'));
+GO
+

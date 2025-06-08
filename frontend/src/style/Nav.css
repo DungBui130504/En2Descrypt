@@ -1,0 +1,43 @@
+.my-nav {
+    padding: 20px 10px;
+    margin: 0;
+}
+
+.custom-toggler {
+    border: none !important;
+    /* Bỏ viền */
+    box-shadow: none !important;
+    /* Bỏ hiệu ứng focus */
+    outline: none !important;
+    background-color: transparent;
+    /* Nút trong suốt (tuỳ chọn) */
+    padding: 0.25rem;
+    /* Có thể chỉnh padding nếu muốn */
+}
+
+.custom-toggler .navbar-toggler-icon {
+    filter: invert(100%);
+    /* Biến icon màu trắng */
+}
+
+/* .my-ul {
+} */
+
+@media (max-width: 540px) {
+    .my-ul {
+        margin-top: 15px;
+        border-top: 1px solid white;
+    }
+}
+
+@media (max-width: 344px) {
+    .my-ul {
+        margin-top: 15px;
+        border-top: 1px solid white;
+    }
+}
+
+
+.my-li {
+    padding: 10px 10px;
+}
