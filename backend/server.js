@@ -5,19 +5,17 @@ const api = require('./src/api/api.js');
 const cors = require('cors');
 const bodyParser = require('body-parser');
 const cookieParser = require('cookie-parser');
-const fs = require('fs');
+const { readFileSync, writeFileSync, unlinkSync } = require('fs');
 const path = require('path');
-const { PDFDocument, rgb, StandardFonts } = require('pdf-lib');
+const { PDFDocument, rgb } = require('pdf-lib');
 const multer = require('multer');
 const upload = multer({ storage: multer.memoryStorage() });
-const { default: signer, plainAddPlaceholder } = require('node-signpdf');
-const { readFileSync } = require('fs');
-const fontBytes = fs.readFileSync('./src/fonts/Roboto-Regular.ttf');
+const { SignPdf, plainAddPlaceholder } = require('node-signpdf');
+const signer = new SignPdf();
 const fontkit = require('@pdf-lib/fontkit');
-const { generateKeyPairSync } = require('crypto');
-const { generateKeyPair, signMessage, verifySignature } = require('./src/scrypt/rsaSIgn.js');
-const { extractSignatureBase64 } = require('./src/util/base64parse.js');
-const { splitStringByLength } = require('./src/helper/slpitString.js');
+const tmp = require('tmp');
+const { execSync } = require('child_process');
+
 
 // Init server
 const app = express();
@@ -33,44 +31,35 @@ app.use(cors({
 app.use(bodyParser.json());
 app.use(cookieParser());
 
-function sanitizeFilename(filename) {
-    return filename.replace(/[^a-zA-Z0-9.-]/g, '-');
-}
-
 app.post('/sign', upload.fields([
     { name: 'pdf', maxCount: 1 },
     { name: 'image', maxCount: 1 }
 ]), async (req, res) => {
     try {
+        // 1. Load file PDF gốc
         const originalPdfBuffer = req.files['pdf'][0].buffer;
         const imageFile = req.files['image']?.[0];
-
         const x = parseFloat(req.body.x);
         const yClient = parseFloat(req.body.y);
         const pageNumber = parseInt(req.body.page, 10);
-
-        const pdfDoc = await PDFDocument.load(originalPdfBuffer);
-        pdfDoc.registerFontkit(fontkit);
-        const customFont = await pdfDoc.embedFont(fontBytes);
-
-        const pages = pdfDoc.getPages();
-        const page = pages[pageNumber - 1];
-
-        const { height } = page.getSize();
-        const y = height - yClient; // chuyển tọa độ từ client về PDF
-
         const name = req.body.name;
         const id = req.body.id;
         const text = req.body.text;
+        const filename = req.body.filename || 'signed.pdf';
 
-        // Tạo message
-        const message = name + id + text;
+        // 2. Load PDF và nhúng font
+        const pdfDoc = await PDFDocument.load(originalPdfBuffer);
+        pdfDoc.registerFontkit(fontkit);
+        const fontBytes = readFileSync('./src/fonts/Roboto-Regular.ttf'); // hoặc font bạn muốn
+        const customFont = await pdfDoc.embedFont(fontBytes);
 
-        const { publicKey, privateKey } = generateKeyPair();
+        // 3. Tính lại tọa độ
+        const pages = pdfDoc.getPages();
+        const page = pages[pageNumber - 1];
+        const { height } = page.getSize();
+        const y = height - yClient;
 
-        const signature = signMessage(message, privateKey).toString('base64');
-
-        // 👉 Nhúng ảnh nếu có
+        // 4. Nhúng ảnh nếu có
         let embeddedImage = null;
         if (imageFile) {
             if (imageFile.mimetype === 'image/png') {
@@ -82,132 +71,132 @@ app.post('/sign', upload.fields([
             }
         }
 
-        // 👉 Nếu chỉ có text (không có ảnh)
-        if (!embeddedImage && name && id) {
-            page.drawText(
-                `${splitStringByLength(signature.toString('base64'))}`,
-                {
-                    x,
-                    y,
-                    size: 12,
-                    font: customFont,
-                    color: rgb(0, 0, 0),
-                    lineHeight: 14,
-                }
-            );
-        }
+        // 5. Vẽ text, ảnh hoặc cả hai
+        const signatureText = `Người ký: ${name || '---'}\nSố giấy tờ: ${id || '---'}\nThông tin khác: ${text || ''}`;
 
-        // 👉 Nếu có ảnh
         if (embeddedImage) {
-            const imageWidth = 100;
-            const imageHeight = (embeddedImage.height / embeddedImage.width) * imageWidth;
+            const imgWidth = 100;
+            const imgHeight = (embeddedImage.height / embeddedImage.width) * imgWidth;
 
-            // Ảnh không có text
-            if (!name && !id) {
-                page.drawImage(embeddedImage, {
-                    x,
-                    y,
-                    width: imageWidth,
-                    height: imageHeight,
-                });
-            }
+            page.drawImage(embeddedImage, {
+                x,
+                y,
+                width: imgWidth,
+                height: imgHeight,
+            });
 
-            // Ảnh + thông tin
-            if (name && id) {
-                page.drawImage(embeddedImage, {
-                    x,
-                    y,
-                    width: imageWidth,
-                    height: imageHeight,
-                });
-
-                const textY = y - imageHeight + 40;
-
-                page.drawText(
-                    `${splitStringByLength(signature.toString('base64'))}`,
-                    {
-                        x,
-                        y: textY,
-                        size: 12,
-                        font: customFont,
-                        color: rgb(0, 0, 0),
-                        lineHeight: 14,
-                    }
-                );
-            }
+            page.drawText(signatureText, {
+                x,
+                y: y - imgHeight + 40,
+                size: 12,
+                font: customFont,
+                color: rgb(0, 0, 0),
+                lineHeight: 14,
+            });
+        } else {
+            page.drawText(signatureText, {
+                x,
+                y,
+                size: 12,
+                font: customFont,
+                color: rgb(0, 0, 0),
+                lineHeight: 14,
+            });
         }
 
-        // 🔏 Tạo buffer PDF đã chèn
+        // 6. Lưu lại file PDF đã thêm nội dung hiển thị
         const updatedPdfBuffer = Buffer.from(await pdfDoc.save({ useObjectStreams: false }));
 
-        // ➕ Thêm placeholder để ký số
+        // 7. Thêm vùng placeholder để ký số
         const pdfWithPlaceholder = plainAddPlaceholder({
             pdfBuffer: updatedPdfBuffer,
-            name: name,
-            id: id
+            reason: 'Tôi đồng ý ký số tài liệu này',
+            signatureLength: 8192, // đủ lớn để chứa chữ ký
         });
 
-        // 🔐 Ký số
-        const p12Buffer = readFileSync('./src/certs/certificate.p12');
+        // 8. Ký số bằng certificate.p12
+        const p12Buffer = readFileSync('./src/certs/user.p12');
         const signedPdf = signer.sign(pdfWithPlaceholder, p12Buffer, {
             passphrase: '1235',
         });
 
-        // 📤 Gửi kết quả
-        let filename = req.body.filename || 'signed.pdf';
-        filename = sanitizeFilename(filename);
-
-        const signedPdfBase64 = signedPdf.toString('base64'); // buffer => base64
-
+        // 9. Gửi về kết quả
         res.json({
             filename,
-            signedPdfBase64,
-            publicKey: publicKey,
-            signature: signature.toString('base64')
+            signedPdfBase64: signedPdf.toString('base64'),
+            message: 'PDF đã ký thành công',
         });
 
     } catch (err) {
-        console.error('❌ Error signing PDF:', err);
-        res.status(500).send('Error signing PDF');
+        console.error('❌ Lỗi khi ký PDF:', err);
+        res.status(500).send('Có lỗi xảy ra khi ký PDF');
     }
 });
 
-app.post('/verify', upload.fields([
-    { name: 'pdf', maxCount: 1 },
-    { name: 'publicKey', maxCount: 1 }
-]), (req, res) => {
+app.post('/verify', upload.single('pdf'), async (req, res) => {
     try {
-        const name = req.body.name;
-        const id = req.body.id;
-        const text = req.body.text;
-        const signatureBuffer = Buffer.from(req.body.signature, 'base64');
+        const pdfBuffer = req.file.buffer;
+        const pdfStr = pdfBuffer.toString('latin1');
 
-        const pdfBuffer = req.files['pdf'][0].buffer;
-        const publicKeyBuffer = req.files['publicKey'][0].buffer;
-        const publicKeyPem = publicKeyBuffer.toString('utf-8');
-
-
-        // Tạo message
-        const message = name + id + text;
-
-        const isValid = verifySignature(message, signatureBuffer, publicKeyPem);
-
-
-        if (isValid) {
-            res.json({ valid: true, message: '✔️ Chữ ký hợp lệ!' });
-        } else {
-            res.json({ valid: false, message: '❌ Chữ ký không hợp lệ!' });
+        // 1. Tìm ByteRange trong file PDF
+        const byteRangeMatch = /\/ByteRange\s*\[\s*(\d+)\s+(\d+)\s+(\d+)\s+(\d+)\s*\]/.exec(pdfStr);
+        if (!byteRangeMatch) {
+            return res.status(400).json({ valid: false, message: '❌ Không tìm thấy ByteRange trong PDF' });
         }
 
+        const [start1, len1, start2, len2] = byteRangeMatch.slice(1).map(Number);
+
+        // 2. Ghép các phần dữ liệu chưa bị ký
+        const signedData = Buffer.concat([
+            pdfBuffer.slice(start1, start1 + len1),
+            pdfBuffer.slice(start2, start2 + len2)
+        ]);
+
+        // 3. Trích xuất chữ ký từ PDF (định dạng hex giữa dấu < >)
+        const signatureSegment = pdfBuffer.slice(start1 + len1, start2).toString('latin1');
+        const hexMatch = signatureSegment.match(/<([0-9A-Fa-f\s]+)>/);
+        if (!hexMatch) {
+            return res.status(400).json({ valid: false, message: '❌ Không tìm thấy chữ ký hex trong PDF' });
+        }
+
+        const signatureHex = hexMatch[1].replace(/\s+/g, '').replace(/(00)+$/, '');
+        const signatureBuffer = Buffer.from(signatureHex, 'hex');
+
+        // 4. Ghi ra các file tạm
+        const signedFilePath = tmp.tmpNameSync();
+        const sigFilePath = tmp.tmpNameSync();
+        const caCertPath = './src/certs/ca.pem';
+
+        writeFileSync(signedFilePath, signedData);
+        writeFileSync(sigFilePath, signatureBuffer);
+
+        // 5. Dùng OpenSSL để xác minh chữ ký
+        let verified = false;
+        let output = '';
+
+        try {
+            output = execSync(`openssl smime -verify -in "${sigFilePath}" -inform DER -content "${signedFilePath}" -CAfile "${caCertPath}"`).toString();
+            verified = true;
+        } catch (err) {
+            output = err.stderr ? err.stderr.toString() : err.message;
+        }
+
+        // 6. Dọn file tạm
+        unlinkSync(signedFilePath);
+        unlinkSync(sigFilePath);
+
+        res.json({
+            valid: verified,
+            message: verified ? '✅ Chữ ký hợp lệ' : '❌ Chữ ký không hợp lệ',
+            opensslOutput: output
+        });
+
     } catch (err) {
-        console.error('Error verifying signature:', err);
-        res.status(500).send('Lỗi máy chủ khi kiểm tra chữ ký');
+        console.error('❌ Lỗi xác minh với OpenSSL:', err);
+        res.status(500).json({ valid: false, message: '❌ Lỗi server khi xác minh' });
     }
 });
 
-
-
-// Import API
 app.use('/api', api);
 
 // Listen server

@@ -59,8 +59,6 @@ function PDFViewer({ file, originalFile, imageFile, setImageFile, name, setName,
         try {
             const res = await axios.post('http://localhost:3000/sign', formData);
 
-            localStorage.setItem('signature', res.data.signature);
-
             const { signedPdfBase64, publicKey, filename } = res.data;
 
             // --- Giải mã PDF base64 thành Blob ---
@@ -86,16 +84,6 @@ function PDFViewer({ file, originalFile, imageFile, setImageFile, name, setName,
             document.body.appendChild(pdfLink);
             pdfLink.click();
             pdfLink.remove();
-
-            // --- Tạo và tải publicKey.txt ---
-            const publicKeyBlob = new Blob([publicKey], { type: 'text/plain' });
-            const publicKeyUrl = URL.createObjectURL(publicKeyBlob);
-            const publicKeyLink = document.createElement('a');
-            publicKeyLink.href = publicKeyUrl;
-            publicKeyLink.setAttribute('download', 'keys.txt');
-            document.body.appendChild(publicKeyLink);
-            publicKeyLink.click();
-            publicKeyLink.remove();
 
         } catch (error) {
             console.error('Error signing PDF:', error);

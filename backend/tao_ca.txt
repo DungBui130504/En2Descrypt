@@ -1,0 +1,7 @@
+mkdir ca && cd ca
+
+# 1.1 Tạo private key cho CA
+openssl genrsa -out ca.key 2048
+
+# 1.2 Tạo CA certificate (tự ký)
+openssl req -x509 -new -nodes -key ca.key -sha256 -days 3650 -out ca.pem

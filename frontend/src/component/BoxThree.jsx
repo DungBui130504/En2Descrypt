@@ -7,7 +7,6 @@ import axios from 'axios';
 const BoxThree = ({ imageFile, setImageFile, name, setName, idNumber, setIdNumber, signType, setSignType, text, setText }) => {
     const offcanvasRef = useRef(null);
     const [signedFile, setSignedFile] = useState(null); // file pdf đã ký
-    const [keyFile, setKeyFile] = useState(null);       // file khóa public key (txt)
     const [verifyResult, setVerifyResult] = useState(null);
     const [loading, setLoading] = useState(false);
 
@@ -21,19 +20,9 @@ const BoxThree = ({ imageFile, setImageFile, name, setName, idNumber, setIdNumbe
         setSignedFile(e.target.files[0]);
     };
 
-    const handleKeyFileChange = (e) => {
-        setKeyFile(e.target.files[0]);
-    };
-
     const handleVerify = async () => {
-        if (!signedFile || !keyFile || !name || !idNumber) {
+        if (!signedFile) {
             alert("Vui lòng chọn đầy đủ file cần thiết !");
-            return;
-        }
-
-        const signature = localStorage.getItem('signature');
-        if (!signature) {
-            alert("Không tìm thấy chữ ký trong localStorage.");
             return;
         }
 
@@ -43,18 +32,15 @@ const BoxThree = ({ imageFile, setImageFile, name, setName, idNumber, setIdNumbe
         try {
             const formData = new FormData();
             formData.append('pdf', signedFile);
-            formData.append('publicKey', keyFile); // GỬI FILE CHỨ KHÔNG ĐỌC .text()
-            formData.append('name', name);
-            formData.append('id', idNumber);
-            formData.append('text', text);
-            formData.append('signature', signature); // signature từ localStorage
 
             const response = await axios.post('http://localhost:3000/verify', formData, {
                 headers: { 'Content-Type': 'multipart/form-data' }
             });
 
+            // console.log(response.data);
+
             if (response.data && response.data.valid !== undefined) {
-                setVerifyResult(response.data.valid ? "Chữ ký hợp lệ ✅" : "Chữ ký bị giả mạo ❌");
+                setVerifyResult(response.data.valid ? `Chữ ký hợp lệ ✅ \n ${response.data.opensslOutput}` : "Chữ ký bị giả mạo ❌");
             } else {
                 setVerifyResult("Không nhận được kết quả hợp lệ từ server !");
             }
@@ -96,7 +82,11 @@ const BoxThree = ({ imageFile, setImageFile, name, setName, idNumber, setIdNumbe
                         className="btn-close"
                         data-bs-dismiss="offcanvas"
                         aria-label="Đóng"
-                        onClick={() => window.location.reload()}
+                        onClick={() => {
+                            setSignedFile(null);
+                            setVerifyResult(null);
+                            setLoading(false);
+                        }}
                     ></button>
                 </div>
                 <div className="offcanvas-body my-canvas-body">
@@ -110,16 +100,6 @@ const BoxThree = ({ imageFile, setImageFile, name, setName, idNumber, setIdNumbe
                         />
                     </div>
 
-                    <div style={{ marginBottom: '10px' }}>
-                        <label>Chọn file khóa: </label>
-                        <input
-                            type="file"
-                            accept=".txt"
-                            style={{ marginLeft: '20px', marginTop: '10px' }}
-                            onChange={handleKeyFileChange}
-                        />
-                    </div>
-
                     <button
                         style={{ maxWidth: '50%', padding: '10px 20px' }}
                         onClick={handleVerify}
@@ -128,7 +108,7 @@ const BoxThree = ({ imageFile, setImageFile, name, setName, idNumber, setIdNumbe
                         {loading ? "Đang xác thực..." : "Xác thực"}
                     </button>
 
-                    {verifyResult && <p style={{ marginTop: '15px', fontWeight: 'bold' }}>{verifyResult}</p>}
+                    {verifyResult && <pre style={{ marginTop: '15px', fontWeight: 'bold' }}>{verifyResult}</pre>}
                 </div>
             </div>
         </div>

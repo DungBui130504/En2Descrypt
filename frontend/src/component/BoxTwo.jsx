@@ -168,14 +168,10 @@ const BoxTwo = ({ imageFile, setImageFile, name, setName, idNumber, setIdNumber,
                                 }
 
                                 {(signType == 'text-only' || signType == 'image-text') &&
-                                    <div style={{
-                                        display: 'flex',
-                                        flexDirection: 'column',
-                                        alignItems: 'center',
-                                        justifyContent: 'center'
-                                    }}>
+                                    <div>
                                         <p style={{ padding: '0', margin: '0' }}>Họ và tên: {name}</p>
-                                        <p>Số giấy tờ: {idNumber}</p>
+                                        <p style={{ padding: '0', margin: '0' }}>Số giấy tờ: {idNumber}</p>
+                                        <p style={{ padding: '0', margin: '0' }}>Thông tin khác: {text}</p>
                                     </div>
                                 }
 

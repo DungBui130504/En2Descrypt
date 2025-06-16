@@ -1,0 +1,18 @@
+# Tạo khóa 
+openssl genrsa -out user.key 2048
+
+# Tạo csr
+openssl req -new -key user.key -out user.csr
+
+# Thêm ca
+openssl x509 -req -in user.csr -CA ca.pem -CAkey ca.key -CAcreateserial -out user.crt -days 365 -sha256
+
+# Tạo .p12
+openssl pkcs12 -export -out user.p12 -inkey user.key -in user.crt -certfile ca.pem
+
+(pass: 1235)
+
+kiem tra file p12: openssl pkcs12 -info -in user.p12
+
+openssl x509 -in ca.pem -noout -text
+
